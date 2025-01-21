@@ -16,8 +16,14 @@ export class User extends Document {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ default: false })
-  isVerified: boolean;
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true, unique: true })
+  phoneNumber: string;
+
+  @Prop({ required: false })
+  userImage: string;
 
   @Prop({ type: Date })
   createdAt: Date;
@@ -27,20 +33,6 @@ export class User extends Document {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-
-UserSchema.virtual('user_image', {
-  ref: 'UserImage',
-  localField: '_id',
-  foreignField: 'user',
-  justOne: true
-});
-
-UserSchema.virtual('profile', {
-  ref: 'Profile',
-  localField: '_id',
-  foreignField: 'user',
-  justOne: true
-});
 
 UserSchema.pre('save', async function (next: (err?: Error) => void) {
   try {

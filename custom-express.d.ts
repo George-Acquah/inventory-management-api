@@ -2,7 +2,7 @@
 interface _ISafeUser {
   _id: string;
   email: string;
-  isVerified: boolean;
+  name: string;
 }
 declare namespace Express {
   interface Request {

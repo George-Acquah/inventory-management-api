@@ -1,45 +1,29 @@
 import {
   Controller,
   Get,
-  NotFoundException,
   Param,
-  Post,
   Res,
-  ServiceUnavailableException,
-  UseInterceptors
+  BadRequestException
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+
+import { StorageService } from '../storage/storage.service';
 import { Response } from 'express';
-import { StorageService } from './storage.service';
-import { StorageFile } from 'src/configs/storage.config';
 
-@Controller('media')
-export class MediaController {
-  constructor(private storageService: StorageService) {}
+@Controller('image')
+export class StorageController {
+  constructor(private readonly storageService: StorageService) {}
 
-  @Post()
-  @UseInterceptors(
-    FileInterceptor('file', {
-      limits: {
-        files: 1,
-        fileSize: 1024 * 1024
-      }
-    })
-  )
-  @Get('/:mediaId')
-  async downloadMedia(@Param('mediaId') mediaId: string, @Res() res: Response) {
-    let storageFile: StorageFile;
+  @Get(':filename')
+  async getFile(
+    @Param('filename') fileName: string,
+    @Res() response: Response
+  ): Promise<void> {
     try {
-      storageFile = await this.storageService.get('media/' + mediaId);
-    } catch (e) {
-      if (e.message.toString().includes('No such object')) {
-        throw new NotFoundException('image not found');
-      } else {
-        throw new ServiceUnavailableException('internal error');
-      }
+      return await this.storageService.getFile(fileName, response);
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || 'Error retrieving file. Please try again.'
+      );
     }
-    res.setHeader('Content-Type', storageFile.contentType);
-    res.setHeader('Cache-Control', 'max-age=60d');
-    res.end(storageFile.buffer);
   }
 }

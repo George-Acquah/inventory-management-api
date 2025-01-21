@@ -1,14 +1,6 @@
-//Modify this enum here if you have different user types or else delete it
-enum DbUserType {
-  CUSTOMER = 'customers',
-  PARK_OWNER = 'parkowners'
-}
-
 enum UserType {
-  CUSTOMER = 'Customer',
-  PARK_OWNER = 'ParkOwner',
   ADMIN = 'Admin',
-  MODERATOR = 'Moderator>'
+  STAFF = 'Moderator>'
 }
 
 enum UserConstraints {
@@ -36,4 +28,4 @@ enum UserSuccess {
   SUCCESSFUL_LOGIN = 'You have successfully logged in as'
 }
 
-export { UserConstraints, DbUserType, UserType, UserErrors, UserSuccess };
+export { UserConstraints, UserType, UserErrors, UserSuccess };

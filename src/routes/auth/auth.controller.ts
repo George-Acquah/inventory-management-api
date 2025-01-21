@@ -1,35 +1,22 @@
-import {
-  Body,
-  Controller,
-  Post,
-  Query,
-  UseGuards,
-  UsePipes,
-  ValidationPipe
-} from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { MailService } from '../mail/mail.service';
 import { CreateUserDto } from 'src/shared/dtos/users/create-users.dto';
 import { LoginUserDto } from 'src/shared/dtos/users/login-users.dtos';
 import { RefreshJwtAuthGuard } from 'src/shared/guards/refreshJwt.guard';
 import { ApiResponse } from 'src/shared/res/api.response';
 import { User } from 'src/shared/decorators/user.decorator';
 import { UsersService } from '../users/users.service';
-import { AccountVerificationService } from '../verify-account/verify-account.service';
-import { VerifyAccountQueryDto } from 'src/shared/dtos/users/verify-account.dto';
-// import { LocalJwtAuthGuard } from 'src/shared/guards/local-jwt.guard';
-
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly userService: UsersService,
-    private readonly mailService: MailService,
-    private readonly accountVerificationService: AccountVerificationService
+    private readonly userService: UsersService
   ) {}
+
   @Post('users/register')
   async registerUser(@Body() data: CreateUserDto) {
     try {
+      console.log(data.password);
       const result = await this.userService.createUser(data);
 
       if (!result) {
@@ -43,16 +30,6 @@ export class AuthController {
       //We destructure _id and send whatever remains in the result as owner
       const { _id, ...user } = result;
       console.log(_id);
-
-      const verificationToken =
-        await this.accountVerificationService.createVerificationToken(
-          user.email
-        );
-      await this.mailService.sendAccountVerificationToken(
-        user.email,
-        'some-user-name',
-        verificationToken
-      );
 
       return new ApiResponse(
         200,
@@ -86,27 +63,6 @@ export class AuthController {
       return new ApiResponse(
         error?.response?.statusCode ?? 400,
         error?.message ?? 'Something Bad Occured while logging in',
-        {}
-      );
-    }
-  }
-
-  @Post('account/verify')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  async verifyAccount(@Query() query: VerifyAccountQueryDto) {
-    try {
-      const { code, email } = query; // Destructure the validated query parameters
-      const response = await this.authService.verifyAccount(code, email);
-
-      return new ApiResponse(
-        200,
-        `Your account has successfully been verified`,
-        response
-      );
-    } catch (error) {
-      return new ApiResponse(
-        error.status ?? 400,
-        error.message ?? 'Something bad occurred while verifying your account',
         {}
       );
     }

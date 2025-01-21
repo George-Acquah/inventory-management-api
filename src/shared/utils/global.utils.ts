@@ -1,5 +1,3 @@
-import { UserType } from '../enums/users.enum';
-
 function extractToken(prefix: string, authHeader: string | undefined) {
   if (authHeader && authHeader.split(' ')[0] === prefix) {
     console.log('passed');
@@ -24,11 +22,4 @@ const convertDateToString = (dateString: string, locale = 'en-US') => {
   return formatter.format(date);
 };
 
-function formatUserType(type: UserType) {
-  if (type === UserType.PARK_OWNER) {
-    return 'Park Owner';
-  }
-  return type;
-}
-
-export { extractToken, convertDateToString, formatUserType };
+export { extractToken, convertDateToString };

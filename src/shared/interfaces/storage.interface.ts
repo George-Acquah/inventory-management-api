@@ -1,7 +1,5 @@
 interface _IGcp {
-  path: string;
-  mediaBucket: string;
-  url: string;
+  uploadPath: string;
 }
 
 export { _IGcp };

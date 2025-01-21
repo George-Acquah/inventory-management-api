@@ -5,9 +5,10 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './routes/auth/auth.module';
 import { UsersModule } from './routes/users/users.module';
 import { RootMongooseModule } from './modules/mongo.module';
-import { MailModule } from './routes/mail/mail.module';
-import { AccountVerificationModule } from './routes/verify-account/verify-account.module';
 import { StorageService } from './routes/storage/storage.service';
+import { ItemsModule } from './routes/items/items.module';
+import { TransactionsModule } from './routes/transactions/transactions.module';
+import { StorageModule } from './routes/storage/storage.module';
 
 @Module({
   imports: [
@@ -15,8 +16,9 @@ import { StorageService } from './routes/storage/storage.service';
     RootMongooseModule,
     AuthModule,
     UsersModule,
-    MailModule,
-    AccountVerificationModule
+    ItemsModule,
+    TransactionsModule,
+    StorageModule
   ],
   controllers: [AppController],
   providers: [AppService, StorageService]

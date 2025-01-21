@@ -22,6 +22,6 @@ export function sanitizeLoginUserFn(user: _IDbUser): _ISafeUser {
   return {
     _id: user._id.toString(),
     email: user.email,
-    isVerified: user.isVerified
+    name: user.name
   };
 }

@@ -6,13 +6,6 @@ export interface _ILoginResponse<T = _ISafeUser> {
   tokens: _ITokens;
 }
 
-export interface _ILookup {
-  from: string;
-  foreignField: string;
-  as: string;
-  localField?: string;
-}
-
 /**
  * PaginationMeta Interface
  *

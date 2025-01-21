@@ -19,8 +19,8 @@ async function bootstrap() {
   const port = parseInt(configService.get('PORT'));
 
   //Get the client port
-  const clientPort = parseInt(configService.get('CLIENT_PORT'));
-  logger.log(`Server is running on port ${clientPort}`);
+  // const clientPort = parseInt(configService.get('CLIENT_PORT'));
+  // logger.log(`Server is running on port ${clientPort}`);
 
   //Use Pipes
   app.useGlobalPipes(new ValidationPipe());
