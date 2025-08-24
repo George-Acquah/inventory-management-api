@@ -1,9 +1,5 @@
 import {
-  ConflictException,
-  Injectable,
-  NotFoundException
-} from '@nestjs/common';
-import mongoose, {
+  Types,
   Model,
   Document,
   FilterQuery,
@@ -12,6 +8,9 @@ import mongoose, {
 } from 'mongoose';
 import { _ILookup } from '../interfaces/aggregation.interface';
 import { _IAnalyticsData } from '../interfaces/transactions.interface';
+import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator';
+import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
+import { NotFoundException } from '@nestjs/common/exceptions/not-found.exception';
 
 @Injectable()
 export class AggregationService {
@@ -73,7 +72,7 @@ export class AggregationService {
       // Ensure that the updated fields do not violate uniqueness constraints
       const conflictingDoc = await model.findOne({
         ...uniqueFields,
-        _id: { $ne: new mongoose.Types.ObjectId(id) }
+        _id: { $ne: new Types.ObjectId(id) }
       });
       if (conflictingDoc) {
         throw new ConflictException(`${errHelper[0]} already exists`);
@@ -146,7 +145,7 @@ export class AggregationService {
         {
           $match: {
             $or: [
-              { _id: new mongoose.Types.ObjectId(identifier) }, // Match by _id
+              { _id: new Types.ObjectId(identifier) }, // Match by _id
               { email: identifier } // Match by email
             ]
           }
@@ -159,7 +158,7 @@ export class AggregationService {
         {
           $limit: 1 // Limit to 1 result
         }
-      ])) as Array<{ _id: mongoose.Types.ObjectId }> | []; // Ensure type casting for returned pipeline results
+      ])) as Array<{ _id: Types.ObjectId }> | []; // Ensure type casting for returned pipeline results
 
       // Check if a document was found and return its _id as a string
       return pipeline.length > 0 ? pipeline[0]._id.toString() : null;

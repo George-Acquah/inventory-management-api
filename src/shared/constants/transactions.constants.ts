@@ -1,5 +1,5 @@
 import { _IAggregationFields } from '../interfaces/aggregation.interface';
-import { Transactions } from '../schemas/transactions.schema';
+import { Transactions } from '../schemas/transaction/transaction';
 
 export const projectTransactionsFields: (keyof Transactions)[] = [
   'soldByName',

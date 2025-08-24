@@ -22,4 +22,16 @@ export interface _ISafeUser {
   name: string;
 }
 
+export interface _ICreateUser {
+  email: string;
+  password: string;
+  name: string;
+  phoneNumber: string;
+}
+
+export interface _ILoginUser {
+  email: string;
+  password: string;
+}
+
 export { _IDbUser, _ISanitizedUser };

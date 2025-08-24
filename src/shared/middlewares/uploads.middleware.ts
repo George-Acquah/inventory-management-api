@@ -1,7 +1,8 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Response, NextFunction } from 'express';
 import * as multer from 'multer';
 import { _ICustomRequest } from '../interfaces/custom-request.interface';
+import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator';
+import { NestMiddleware } from '@nestjs/common/interfaces/middleware/nest-middleware.interface';
 
 @Injectable()
 export class UploadMiddleware implements NestMiddleware {

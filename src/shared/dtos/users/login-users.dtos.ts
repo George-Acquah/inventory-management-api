@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class LoginUserDto {
   //Basically, we use @IsEmail decorator to validate emails but was failing for some reasons

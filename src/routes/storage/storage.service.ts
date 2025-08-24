@@ -1,11 +1,12 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Response } from 'express';
-import { ConfigService } from '@nestjs/config';
 import { gcpConfigKey } from 'src/shared/constants/storage.constants';
 import { _IGcp } from 'src/shared/interfaces/storage.interface';
 import { getDesktopPath } from 'src/shared/helpers/global.helpers';
+import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator';
+import { BadRequestException } from '@nestjs/common/exceptions/bad-request.exception';
+import { ConfigService } from '@nestjs/config/dist/config.service';
 
 @Injectable()
 export class StorageService {

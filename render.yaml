@@ -1,0 +1,31 @@
+services:
+  - type: web
+    env: docker
+    name: inventory-management-api
+    repo: https://github.com/George-Acquah/inventory-management-api
+    plan: free
+    branch: main
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: REFRESH_KEY
+        sync: false
+      - key: FILES_PATH
+        sync: false
+      # - key: REDIS_URL
+      #   fromService:
+      #     name: attribute-redis
+      #     type: redis
+      #     property: connectionString
+
+  # - type: redis
+  #   name: attribute-redis
+  #   plan: free
+  #   ipAllowList: []

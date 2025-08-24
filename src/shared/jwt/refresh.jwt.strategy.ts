@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import { _IPayload } from 'src/shared/interfaces/jwt_payload.interface';
 import { strategies } from 'src/shared/constants/auth.constants';
 import { AuthService } from 'src/routes/auth/auth.service';
+import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator';
+import { NotFoundException } from '@nestjs/common/exceptions/not-found.exception';
+import { PassportStrategy } from '@nestjs/passport/dist/passport/passport.strategy';
 
 @Injectable()
 export class RefreshStrategy extends PassportStrategy(

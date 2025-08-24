@@ -1,4 +1,5 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop } from '@nestjs/mongoose/dist/decorators/prop.decorator';
+import { Schema } from '@nestjs/mongoose/dist/decorators/schema.decorator';
 import { HydratedDocument, Document } from 'mongoose';
 
 export type TransactionsDocument = HydratedDocument<Transactions>;
@@ -6,7 +7,7 @@ export type TransactionsDocument = HydratedDocument<Transactions>;
 @Schema({
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
-  timestamps: true // Automatically add createdAt and updatedAt fields
+  timestamps: true
 })
 export class Transactions extends Document {
   @Prop({
@@ -42,5 +43,3 @@ export class Transactions extends Document {
   @Prop({ type: Date })
   updatedAt: Date;
 }
-
-export const TransactionsSchema = SchemaFactory.createForClass(Transactions);

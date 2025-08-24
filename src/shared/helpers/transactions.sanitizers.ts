@@ -1,5 +1,5 @@
 import { _ITransaction } from '../interfaces/transactions.interface';
-import { Transactions } from '../schemas/transactions.schema';
+import { Transactions } from '../schemas/transaction/transaction';
 import { convertDateToString } from '../utils/global.utils';
 
 export function sanitizeTransactionsFn(
@@ -9,7 +9,7 @@ export function sanitizeTransactionsFn(
     return null;
   }
 
-  delete transaction.__v; // Remove Mongoose version key if present
+  // delete transaction.__v; // Remove Mongoose version key if present
   transaction._id.toString();
 
   // Sanitize the items array
@@ -35,7 +35,7 @@ export function sanitizeAnalyticsFn(transaction: Transactions): any {
     return null;
   }
 
-  delete transaction.__v; // Remove Mongoose version key if present
+  // delete transaction.__v; // Remove Mongoose version key if present
   transaction._id.toString();
 
   // Sanitize the items array

@@ -1,4 +1,3 @@
-import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
@@ -7,10 +6,13 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from 'src/shared/jwt/jwt.strategy';
 import { LocalJwtStrategy } from 'src/shared/jwt/local.jwt.strategy';
 import { RefreshStrategy } from 'src/shared/jwt/refresh.jwt.strategy';
-import { LocalJwtAuthGuard } from 'src/shared/guards/local-jwt.guard';
-import { RefreshJwtAuthGuard } from 'src/shared/guards/refreshJwt.guard';
-import { JwtAuthGuard } from 'src/shared/guards/Jwt.guard';
-import { ConfigService } from '@nestjs/config';
+import { Module } from '@nestjs/common/decorators/modules/module.decorator';
+import { ConfigService } from '@nestjs/config/dist/config.service';
+import {
+  JwtAuthGuard,
+  LocalJwtAuthGuard,
+  RefreshJwtAuthGuard
+} from 'src/shared/guards';
 
 @Module({
   imports: [UsersModule, JwtAuthModule, PassportModule],

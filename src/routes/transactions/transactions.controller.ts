@@ -1,19 +1,20 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  ParseIntPipe,
-  Query,
-  UseGuards
-} from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from 'src/shared/dtos/transactions/create-transaction.dto';
 import { User } from 'src/shared/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/shared/guards/Jwt.guard';
-import { ApiResponse } from 'src/shared/res/api.response';
+import { Controller } from '@nestjs/common/decorators/core/controller.decorator';
+import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
+import {
+  Delete,
+  Get,
+  Post
+} from '@nestjs/common/decorators/http/request-mapping.decorator';
+import {
+  Body,
+  Param,
+  Query
+} from '@nestjs/common/decorators/http/route-params.decorator';
+import { ParseIntPipe } from '@nestjs/common/pipes/parse-int.pipe';
 
 @Controller('transactions')
 export class TransactionsController {
@@ -25,27 +26,11 @@ export class TransactionsController {
     @Body() createTransactionDto: CreateTransactionDto,
     @User() user: _ISafeUser
   ) {
-    try {
-      const data = await this.transactionsService.create({
-        ...createTransactionDto,
-        soldById: user._id,
-        soldByName: user.name
-      });
-
-      if (data) {
-        return new ApiResponse(
-          200,
-          `You have Successfully created your Transaction`,
-          {}
-        );
-      }
-    } catch (error) {
-      return new ApiResponse(
-        error?.response?.statusCode ?? 400,
-        error?.message ?? 'Something Bad Occured while logging in',
-        {}
-      );
-    }
+    return await this.transactionsService.create({
+      ...createTransactionDto,
+      soldById: user._id,
+      soldByName: user.name
+    });
   }
 
   @Get()
@@ -54,49 +39,17 @@ export class TransactionsController {
     @Query('currentPage', new ParseIntPipe()) currentPage: number,
     @Query('size', new ParseIntPipe()) size: number
   ) {
-    try {
-      const data = await this.transactionsService.findAll(
-        query,
-        currentPage,
-        size
-      );
-      return new ApiResponse(200, 'Fetched vehicles Successfully', data);
-    } catch (error) {
-      return new ApiResponse(
-        error?.response?.statusCode ?? 400,
-        error.message,
-        {}
-      );
-    }
+    return await this.transactionsService.findAll(query, currentPage, size);
   }
 
   @Get('analytics')
   async getAnalyticsData() {
-    try {
-      const data = await this.transactionsService.getAnalyticsData();
-      return new ApiResponse(200, 'Fetched analyics data Successfully', data);
-    } catch (error) {
-      return new ApiResponse(
-        error?.response?.statusCode ?? 400,
-        error.message,
-        {}
-      );
-    }
+    return await this.transactionsService.getAnalyticsData();
   }
 
   @Get(':id')
   async findOneTransaction(@Param('id') id: string) {
-    try {
-      const data = await this.transactionsService.findOne(id);
-      return new ApiResponse(200, 'Fetched vehicles Successfully', data);
-    } catch (error) {
-      console.log(error);
-      return new ApiResponse(
-        error?.response?.statusCode ?? 400,
-        error.message,
-        {}
-      );
-    }
+    return await this.transactionsService.findOne(id);
   }
 
   // @Patch(':id')
@@ -122,16 +75,6 @@ export class TransactionsController {
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    try {
-      const result = await this.transactionsService.remove(id);
-      return new ApiResponse(200, result, {});
-    } catch (error) {
-      console.log(error);
-      return new ApiResponse(
-        error?.response?.statusCode ?? 400,
-        error.message,
-        {}
-      );
-    }
+    return await this.transactionsService.remove(id);
   }
 }

@@ -3,8 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateUserDto } from 'src/shared/dtos/users/create-users.dto';
 import { sanitizeUserFn } from 'src/shared/helpers/users.sanitizers';
-import { _IDbUser } from 'src/shared/interfaces/users.interface';
+import { _ICreateUser, _IDbUser } from 'src/shared/interfaces/users.interface';
+import { BadRequestResponse, OkResponse } from 'src/shared/res/responses';
 import { AggregationService } from 'src/shared/services/aggregation.service';
+import { handleError } from 'src/shared/utils/errors';
 
 @Injectable()
 export class UsersService {
@@ -50,5 +52,31 @@ export class UsersService {
       sanitizeUserFn
     );
     return sanitizedUser;
+  }
+
+  async registerUserAsync(dto: _ICreateUser) {
+    try {
+      const result = await this.createUser(dto);
+
+      if (!result) {
+        return new BadRequestResponse(
+          'Something Bad Occured while creating your account'
+        );
+      }
+
+      const { _id, ...user } = result;
+      console.log(_id);
+
+      return new OkResponse(
+        user,
+        `You have successfully created an acount with ${user.email}`
+      );
+    } catch (error) {
+      return handleError(
+        'UsersService.registerUserAsync',
+        error,
+        'An error occured while creating your account'
+      );
+    }
   }
 }

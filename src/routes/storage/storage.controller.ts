@@ -1,13 +1,12 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Res,
-  BadRequestException
-} from '@nestjs/common';
-
+import { Controller } from '@nestjs/common/decorators/core/controller.decorator';
 import { StorageService } from '../storage/storage.service';
 import { Response } from 'express';
+import { Get } from '@nestjs/common/decorators/http/request-mapping.decorator';
+import {
+  Param,
+  Res
+} from '@nestjs/common/decorators/http/route-params.decorator';
+import { BadRequestException } from '@nestjs/common/exceptions/bad-request.exception';
 
 @Controller('image')
 export class StorageController {

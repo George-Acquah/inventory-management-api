@@ -1,4 +1,4 @@
-import { _Item } from '../interfaces/Items.interface';
+import { _Item } from '../interfaces/items.interface';
 import { Items } from '../schemas/items.schema';
 import { convertDateToString } from '../utils/global.utils';
 
@@ -7,7 +7,7 @@ export function sanitizeItemFn(item: Items): _Item {
     return null;
   }
 
-  delete item.__v; // Remove Mongoose version key if present
+  // delete item.__v; // Remove Mongoose version key if present
   item._id.toString();
 
   return {

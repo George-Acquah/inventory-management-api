@@ -1,4 +1,4 @@
-import { registerAs } from '@nestjs/config';
+import { registerAs } from '@nestjs/config/dist/utils/register-as.util';
 import { gcpConfigKey } from 'src/shared/constants/storage.constants';
 import { _IGcp } from 'src/shared/interfaces/storage.interface';
 

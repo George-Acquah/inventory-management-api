@@ -1,25 +1,27 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-  ParseIntPipe,
-  Query,
-  MaxFileSizeValidator,
-  ParseFilePipe,
-  UploadedFiles
-} from '@nestjs/common';
 import { ItemsService } from './items.service';
 import { CreateItemDto } from 'src/shared/dtos/items/create-item.dto';
 import { UpdateItemDto } from 'src/shared/dtos/items/update-item.dto';
-import { ApiResponse } from 'src/shared/res/api.response';
 import { JwtAuthGuard } from 'src/shared/guards/Jwt.guard';
 import { User } from 'src/shared/decorators/user.decorator';
 import { UploadService } from 'src/shared/services/uploads.service';
+import { InternalServerErrorResponse } from 'src/shared/res/responses/internal-server-error.response';
+import { Controller } from '@nestjs/common/decorators/core/controller.decorator';
+import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
+import {
+  Delete,
+  Get,
+  Patch,
+  Post
+} from '@nestjs/common/decorators/http/request-mapping.decorator';
+import {
+  Body,
+  Param,
+  Query,
+  UploadedFiles
+} from '@nestjs/common/decorators/http/route-params.decorator';
+import { ParseFilePipe } from '@nestjs/common/pipes/file/parse-file.pipe';
+import { MaxFileSizeValidator } from '@nestjs/common/pipes/file/max-file-size.validator';
+import { ParseIntPipe } from '@nestjs/common/pipes/parse-int.pipe';
 
 @Controller('items')
 export class ItemsController {
@@ -55,23 +57,15 @@ export class ItemsController {
         fileIds.push(...uploadedFileIds); // Spread operator to merge file IDs
       }
 
-      const data = await this.itemsService.create({
+      return await this.itemsService.create({
         ...createItemDto,
         addedById: user._id,
         addedByName: user.name,
         itemImage: fileIds.length > 0 ? fileIds : null
       });
-
-      return new ApiResponse(
-        200,
-        `You have successfully created your item.`,
-        data
-      );
     } catch (error) {
-      return new ApiResponse(
-        error?.response?.statusCode ?? 400,
-        error?.message ?? 'Something bad occurred while creating the item',
-        {}
+      return new InternalServerErrorResponse(
+        'Something bad occurred while creating the item'
       );
     }
   }
@@ -82,33 +76,12 @@ export class ItemsController {
     @Query('currentPage', new ParseIntPipe()) currentPage: number,
     @Query('size', new ParseIntPipe()) size: number
   ) {
-    try {
-      const data = await this.itemsService.findAll(query, currentPage, size);
-      return new ApiResponse(200, 'Fetched vehicles Successfully', data);
-    } catch (error) {
-      console.log(error);
-      return new ApiResponse(
-        error?.response?.statusCode ?? 400,
-        error.message,
-        {}
-      );
-    }
+    return await this.itemsService.findAll(query, currentPage, size);
   }
 
   @Get(':id')
   async findOneItem(@Param('id') id: string) {
-    try {
-      const data = await this.itemsService.findOne(id);
-      console.log(data);
-      return new ApiResponse(200, 'Fetched vehicles Successfully', data);
-    } catch (error) {
-      console.log(error);
-      return new ApiResponse(
-        error?.response?.statusCode ?? 400,
-        error.message,
-        {}
-      );
-    }
+    return await this.itemsService.findOne(id);
   }
 
   @Patch(':id')
@@ -136,32 +109,19 @@ export class ItemsController {
         const uploadedFileIds = await Promise.all(uploadPromises);
         fileIds.push(...uploadedFileIds); // Spread operator to merge file IDs
       }
-      const data = await this.itemsService.update(id, {
+      return await this.itemsService.update(id, {
         ...updateItemDto,
         itemImage: fileIds.length > 0 ? fileIds : undefined
       });
-      return new ApiResponse(200, 'Item updated successfully', data);
     } catch (error) {
-      return new ApiResponse(
-        error?.response?.statusCode ?? 400,
-        error.message,
-        {}
+      return new InternalServerErrorResponse(
+        'Something bad occurred while updating the item'
       );
     }
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    try {
-      const result = await this.itemsService.remove(id);
-      return new ApiResponse(200, result, {});
-    } catch (error) {
-      console.log(error);
-      return new ApiResponse(
-        error?.response?.statusCode ?? 400,
-        error.message,
-        {}
-      );
-    }
+    await this.itemsService.remove(id);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { createFilterConditions } from 'src/shared/constants/global.constants';
@@ -8,15 +8,17 @@ import {
   projectTransactionsFields
 } from 'src/shared/constants/transactions.constants';
 import { sanitizeTransactionsFn } from 'src/shared/helpers/transactions.sanitizers';
-import { _Item } from 'src/shared/interfaces/Items.interface';
+import { _Item } from 'src/shared/interfaces/items.interface';
 import {
   _ITransaction,
   _TCreateTransaction
 } from 'src/shared/interfaces/transactions.interface';
-import { Transactions } from 'src/shared/schemas/transactions.schema';
 import { AggregationService } from 'src/shared/services/aggregation.service';
 import { ItemsService } from '../items/items.service';
 import { Items } from 'src/shared/schemas/items.schema';
+import { Transactions } from 'src/shared/schemas/transaction/transaction';
+import { BadRequestResponse, OkResponse } from 'src/shared/res/responses';
+import { handleError } from 'src/shared/utils/errors';
 
 @Injectable()
 export class TransactionsService {
@@ -34,90 +36,144 @@ export class TransactionsService {
           Transactions,
           Transactions
         >(this.transactionModel, this.projectCreateFields, createItemDto, {}, [
-          'Item',
-          'Item'
+          'Transaction',
+          'Transaction'
         ]);
 
       if (!createdTransaction) {
-        throw new Error('Could not create the transaction');
+        return new BadRequestResponse('Failed to create transaction');
       }
 
-      // Iterate through each item in the transaction to update stock
+      // Update stock for each item
       for (const item of createdTransaction.items) {
-        const soldItem = await this.itemsService.findOne(item.itemId);
+        const soldItemResponse = await this.itemsService.findOne(item.itemId);
 
-        if (!soldItem) {
-          throw new NotFoundException(`Item with ID ${item.itemId} not found`);
+        if (!soldItemResponse.data || !soldItemResponse.data) {
+          return new BadRequestResponse(
+            `Item with ID ${item.itemId} not found`
+          );
         }
 
-        const updatedStock = soldItem.stock - item.quantity;
-
-        // Update stock for the item
-        await this.itemsService.update(item.itemId, {
+        const updatedStock = soldItemResponse.data.stock - item.quantity;
+        const updateResponse = await this.itemsService.update(item.itemId, {
           stock: updatedStock
         });
+
+        if (!updateResponse.data) {
+          return new BadRequestResponse(
+            `Failed to update stock for item ${item.itemId}`
+          );
+        }
       }
 
-      return sanitizeTransactionsFn(createdTransaction);
+      const sanitizedTransaction = sanitizeTransactionsFn(createdTransaction);
+      return new OkResponse(
+        sanitizedTransaction,
+        'Transaction created successfully'
+      );
     } catch (error) {
-      throw error;
+      return handleError(
+        'TransactionsService.create',
+        error,
+        'An error occurred while creating the transaction'
+      );
     }
   }
 
   async findAll(query?: string, page = 1, limit = 5) {
-    const { project_fields, unwind_fields, lookups, count_fields } =
-      FETCH_TRANSACTIONS_AGGREGATION;
+    try {
+      const { project_fields, unwind_fields, lookups, count_fields } =
+        FETCH_TRANSACTIONS_AGGREGATION;
+      const conditions = createFilterConditions<Transactions>(
+        filterTransactionsFields,
+        query
+      );
 
-    const conditions = createFilterConditions<Transactions>(
-      filterTransactionsFields,
-      query
-    );
+      const result = await this.aggregationService.dynamicDocumentsPipeline<
+        Transactions,
+        _ITransaction[]
+      >(
+        this.transactionModel,
+        false,
+        project_fields,
+        query ? (conditions as any) : {},
+        lookups,
+        unwind_fields,
+        count_fields,
+        page,
+        limit,
+        sanitizeTransactionsFn
+      );
 
-    return await this.aggregationService.dynamicDocumentsPipeline<
-      Transactions,
-      _ITransaction[]
-    >(
-      this.transactionModel,
-      false,
-      project_fields,
-      query ? (conditions as any) : {},
-      lookups,
-      unwind_fields,
-      count_fields,
-      page,
-      limit,
-      sanitizeTransactionsFn
-    );
+      if (!result) {
+        return new BadRequestResponse('No transactions found');
+      }
+
+      return new OkResponse(result, 'Transactions retrieved successfully');
+    } catch (error) {
+      return handleError(
+        'TransactionsService.findAll',
+        error,
+        'An error occurred while fetching transactions'
+      );
+    }
   }
 
   async getAnalyticsData() {
-    const itemsModel = this.itemsService.templateItemModel();
-    return await this.aggregationService.analyticsPipeline<Transactions, Items>(
-      this.transactionModel,
-      itemsModel,
-      {}
-    );
+    try {
+      const itemsModel = this.itemsService.templateItemModel();
+      const result = await this.aggregationService.analyticsPipeline<
+        Transactions,
+        Items
+      >(this.transactionModel, itemsModel, {});
+
+      if (!result) {
+        return new BadRequestResponse('Failed to fetch analytics data');
+      }
+
+      return new OkResponse(result, 'Analytics data retrieved successfully');
+    } catch (error) {
+      return handleError(
+        'TransactionsService.getAnalyticsData',
+        error,
+        'An error occurred while fetching analytics data'
+      );
+    }
   }
 
   async findOne(id: string) {
-    const { project_fields, unwind_fields, lookups, count_fields } =
-      FETCH_TRANSACTIONS_AGGREGATION;
+    try {
+      const { project_fields, unwind_fields, lookups, count_fields } =
+        FETCH_TRANSACTIONS_AGGREGATION;
 
-    return await this.aggregationService.dynamicDocumentsPipeline<
-      Transactions,
-      _Item
-    >(
-      this.transactionModel,
-      false,
-      project_fields,
-      { _id: new mongoose.Types.ObjectId(id) },
-      lookups,
-      unwind_fields,
-      count_fields,
-      1,
-      1,
-      sanitizeTransactionsFn
-    );
+      const result = await this.aggregationService.dynamicDocumentsPipeline<
+        Transactions,
+        _Item
+      >(
+        this.transactionModel,
+        false,
+        project_fields,
+        { _id: new mongoose.Types.ObjectId(id) },
+        lookups,
+        unwind_fields,
+        count_fields,
+        1,
+        1,
+        sanitizeTransactionsFn
+      );
+
+      if (!result) {
+        return new BadRequestResponse('Transaction not found');
+      }
+
+      return new OkResponse(result, 'Transaction retrieved successfully');
+    } catch (error) {
+      return handleError(
+        'TransactionsService.findOne',
+        error,
+        'An error occurred while fetching the transaction'
+      );
+    }
   }
 
   // async update(
@@ -147,24 +203,29 @@ export class TransactionsService {
   //   }
   // }
 
-  async remove(id: string): Promise<string> {
-    // Ensure you're using the correct ID type (string for MongoDB ObjectId)
-    const item = await this.transactionModel.findById(id);
+  async remove(id: string) {
+    try {
+      const transaction = await this.transactionModel.findById(id);
 
-    if (!item) {
-      throw new NotFoundException(
-        'You cannot delete an item that does not exist'
+      if (!transaction) {
+        return new BadRequestResponse('Transaction not found');
+      }
+
+      const deletionResult = await this.transactionModel.deleteOne({
+        _id: new mongoose.Types.ObjectId(id)
+      });
+
+      if (deletionResult.deletedCount === 0) {
+        return new BadRequestResponse('Failed to delete transaction');
+      }
+
+      return new OkResponse(null, 'Transaction deleted successfully');
+    } catch (error) {
+      return handleError(
+        'TransactionsService.remove',
+        error,
+        'An error occurred while deleting the transaction'
       );
     }
-
-    const deletionResult = await this.transactionModel.deleteOne({
-      _id: new mongoose.Types.ObjectId(id)
-    });
-
-    if (deletionResult.deletedCount === 0) {
-      throw new NotFoundException('Failed to delete the item.');
-    }
-
-    return 'Item successfully deleted';
   }
 }

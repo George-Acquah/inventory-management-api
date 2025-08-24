@@ -7,7 +7,7 @@ export function sanitizeUserFn(user: Document): _ISafeUser {
   }
 
   // Remove or modify sensitive or unnecessary fields
-  delete user.__v; // Remove Mongoose version key if present
+  // delete user.__v; // Remove Mongoose version key if present
   user._id.toString();
 
   return user as unknown as _ISafeUser;

@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import { _IPayload } from 'src/shared/interfaces/jwt_payload.interface';
 import { strategies } from 'src/shared/constants/auth.constants';
-import { ApiResponse } from '../res/api.response';
 import { AuthService } from 'src/routes/auth/auth.service';
+import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator';
+import { ForbiddenResponse } from '../res/responses';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, strategies.JWT) {
@@ -27,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, strategies.JWT) {
     const user = await this.authService.verifyUser(payload);
 
     if (!user) {
-      throw new ApiResponse(402, 'User does not exist', {});
+      return new ForbiddenResponse('User not found or unauthorized');
     }
 
     return user;
