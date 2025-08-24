@@ -61,6 +61,9 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /usr/src/app
 
 # Copy production-ready assets
-COPY --chown=node:node package.json pnpm-lock.yaml ./
-COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
+# COPY --chown=node:node package.json pnpm-lock.yaml ./
+# COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=build /usr/src/app/dist ./dist
+USER node
+
+CMD ["node", "dist/main"]

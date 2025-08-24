@@ -33,7 +33,7 @@ services:
     env_file:
       - .env
     environment:
-      MONGODB_URI_DEV: mongodb://mongo:27017/inventory_management
+      MONGODB_URI: mongodb://mongo:27017/inventory_management
     depends_on:
       mongo:
         condition: service_healthy
