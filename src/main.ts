@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { AppModule } from './app.module';
 import { NestFactory } from '@nestjs/core/nest-factory';
 import { ConfigService } from '@nestjs/config/dist/config.service';
