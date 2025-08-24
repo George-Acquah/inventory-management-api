@@ -41,7 +41,7 @@ async function bootstrap() {
   //Enable CORS
   app.enableCors({
     origin: isProduction
-      ? ['https://attribute-api1.onrender.com']
+      ? ['https://invo-tracker.vercel.app']
       : [`http://localhost:${port}`, `http://localhost:3000`],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
